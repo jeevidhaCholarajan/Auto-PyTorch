@@ -216,10 +216,10 @@ class TabularClassificationTask(BaseTask):
     def search(
         self,
         optimize_metric: str,
-        X_train: Optional[Union[List, pd.DataFrame, np.ndarray]] = None,
-        y_train: Optional[Union[List, pd.DataFrame, np.ndarray]] = None,
-        X_test: Optional[Union[List, pd.DataFrame, np.ndarray]] = None,
-        y_test: Optional[Union[List, pd.DataFrame, np.ndarray]] = None,
+        X_train: Union[List, pd.DataFrame, np.ndarray],
+        y_train: Union[List, pd.DataFrame, np.ndarray],
+        X_test: Union[List, pd.DataFrame, np.ndarray],
+        y_test: Union[List, pd.DataFrame, np.ndarray],
         dataset_name: Optional[str] = None,
         budget_type: str = 'epochs',
         min_budget: int = 5,
@@ -248,9 +248,11 @@ class TabularClassificationTask(BaseTask):
                 A pair of features (X_train) and targets (y_train) used to fit a
                 pipeline. Additionally, a holdout of this pairs (X_test, y_test) can
                 be provided to track the generalization performance of each stage.
+            dataset_name (Optional[str]):
+                Name of the dayaset, if None, random value is used
             optimize_metric (str):
                 name of the metric that is used to evaluate a pipeline.
-            budget_type (str):
+            budget_type (Optional[str]):
                 Type of budget to be used when fitting the pipeline.
                 It can be one of:
 

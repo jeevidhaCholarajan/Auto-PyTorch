@@ -145,9 +145,15 @@ class BaseTask(ABC):
             name and Value is an Iterable of the names of the components
             to exclude. All except these components will be present in
             the search space.
-        search_space_updates (Optional[HyperparameterSearchSpaceUpdates]):
-            Search space updates that can be used to modify the search
-            space of particular components or choice modules of the pipeline
+        search_space_updates (Optional[HyperparameterSearchSpaceUpdates]): updates to be made
+            to the hyperparameter search space of the pipeline
+        resampling_strategy (Union[CrossValTypes, HoldoutValTypes]),
+                (default=HoldoutValTypes.holdout_validation):
+                strategy to split the training data.
+        resampling_strategy_args (Optional[Dict[str, Any]]): arguments
+            required for the chosen resampling strategy. If None, uses
+            the default values provided in DEFAULT_RESAMPLING_PARAMETERS
+            in ```datasets/resampling_strategy.py```.
     """
 
     def __init__(
@@ -314,7 +320,9 @@ class BaseTask(ABC):
             BaseInputValidator:
                 fitted input validator
         """
-        raise NotImplementedError
+
+        raise NotImplementedError("Function called on BaseTask, this can only be called by "
+                                  "specific task which is a child of the BaseTask")
 
     def get_dataset(
         self,
@@ -579,6 +587,13 @@ class BaseTask(ABC):
             raise ValueError("Resampling strategy is needed to determine what models to load")
         self.ensemble_ = self._backend.load_ensemble(self.seed)
 
+        if isinstance(self._disable_file_output, List):
+            disabled_file_outputs = self._disable_file_output
+            disable_file_output = False
+        elif isinstance(self._disable_file_output, bool):
+            disable_file_output = self._disable_file_output
+            disabled_file_outputs = []
+
         # If no ensemble is loaded, try to get the best performing model
         if not self.ensemble_:
             self.ensemble_ = self._load_best_individual_model()
@@ -593,7 +608,7 @@ class BaseTask(ABC):
                 if len(self.cv_models_) == 0:
                     raise ValueError('No models fitted!')
 
-        elif 'pipeline' not in self._disable_file_output:
+        elif disable_file_output or 'pipeline' not in disabled_file_outputs:
             model_names = self._backend.list_all_models(self.seed)
 
             if len(model_names) == 0:
@@ -1378,11 +1393,9 @@ class BaseTask(ABC):
         Fit a pipeline on the given task for the budget.
         A pipeline configuration can be specified if None,
         uses default
-
         Fit uses the estimator pipeline_config attribute, which the user
         can interact via the get_pipeline_config()/set_pipeline_config()
         methods.
-
         Args:
             configuration (Configuration):
                 configuration to fit the pipeline with.
@@ -1425,7 +1438,6 @@ class BaseTask(ABC):
             budget_type (str):
                 Type of budget to be used when fitting the pipeline.
                 It can be one of:
-
                 + `epochs`: The training of each pipeline will be terminated after
                     a number of epochs have passed. This number of epochs is determined by the
                     budget argument of this method.
@@ -1458,7 +1470,6 @@ class BaseTask(ABC):
                 Used as a list to pass more fine-grained
                 information on what to save. Must be a member of `DisableFileOutputParameters`.
                 Allowed elements in the list are:
-
                 + `y_optimization`:
                     do not save the predictions for the optimization set,
                     which would later on be used to build an ensemble. Note that SMAC
@@ -1473,7 +1484,6 @@ class BaseTask(ABC):
                 + `all`:
                     do not save any of the above.
                 For more information check `autoPyTorch.evaluation.utils.DisableFileOutputParameters`.
-
         Returns:
             (BasePipeline):
                 fitted pipeline
