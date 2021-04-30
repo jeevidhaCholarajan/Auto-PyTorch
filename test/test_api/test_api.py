@@ -7,6 +7,7 @@ import unittest
 from test.test_api.utils import dummy_do_dummy_prediction, dummy_eval_function
 
 import ConfigSpace as CS
+from ConfigSpace.configuration_space import Configuration
 
 import numpy as np
 
@@ -27,6 +28,7 @@ from autoPyTorch.datasets.base_dataset import BaseDataset
 from autoPyTorch.datasets.resampling_strategy import (
     CrossValTypes,
     HoldoutValTypes,
+    NoResamplingStrategyTypes
 )
 from autoPyTorch.optimizer.smbo import AutoMLSMBO
 from autoPyTorch.pipeline.base_pipeline import BasePipeline

@@ -40,7 +40,7 @@ from autoPyTorch.constants import (
 )
 from autoPyTorch.data.base_validator import BaseInputValidator
 from autoPyTorch.datasets.base_dataset import BaseDataset, BaseDatasetPropertiesType
-from autoPyTorch.datasets.resampling_strategy import CrossValTypes, HoldoutValTypes
+from autoPyTorch.datasets.resampling_strategy import CrossValTypes, HoldoutValTypes, NoResamplingStrategyTypes
 from autoPyTorch.ensemble.ensemble_builder import EnsembleBuilderManager
 from autoPyTorch.ensemble.singlebest_ensemble import SingleBest
 from autoPyTorch.evaluation.abstract_evaluator import fit_and_suppress_warnings
@@ -172,7 +172,9 @@ class BaseTask(ABC):
         include_components: Optional[Dict[str, Any]] = None,
         exclude_components: Optional[Dict[str, Any]] = None,
         backend: Optional[Backend] = None,
-        resampling_strategy: Union[CrossValTypes, HoldoutValTypes] = HoldoutValTypes.holdout_validation,
+        resampling_strategy: Union[CrossValTypes,
+                                   HoldoutValTypes,
+                                   NoResamplingStrategyTypes] = HoldoutValTypes.holdout_validation,
         resampling_strategy_args: Optional[Dict[str, Any]] = None,
         search_space_updates: Optional[HyperparameterSearchSpaceUpdates] = None,
         task_type: Optional[str] = None
@@ -1390,9 +1392,6 @@ class BaseTask(ABC):
         disable_file_output: Optional[List[Union[str, DisableFileOutputParameters]]] = None,
     ) -> Tuple[Optional[BasePipeline], RunInfo, RunValue, BaseDataset]:
         """
-        Fit a pipeline on the given task for the budget.
-        A pipeline configuration can be specified if None,
-        uses default
         Fit uses the estimator pipeline_config attribute, which the user
         can interact via the get_pipeline_config()/set_pipeline_config()
         methods.
@@ -1494,6 +1493,7 @@ class BaseTask(ABC):
             (BaseDataset):
                 Dataset created from the given tensors
         """
+        self.dataset_name = dataset.dataset_name
 
         if dataset is None:
             if (

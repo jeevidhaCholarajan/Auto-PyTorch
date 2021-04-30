@@ -15,6 +15,7 @@ from autoPyTorch.datasets.base_dataset import BaseDatasetPropertiesType
 from autoPyTorch.datasets.resampling_strategy import (
     CrossValTypes,
     HoldoutValTypes,
+    NoResamplingStrategyTypes
 )
 from autoPyTorch.datasets.tabular_dataset import TabularDataset
 from autoPyTorch.evaluation.utils import DisableFileOutputParameters
@@ -82,9 +83,11 @@ class TabularRegressionTask(BaseTask):
         output_directory: Optional[str] = None,
         delete_tmp_folder_after_terminate: bool = True,
         delete_output_folder_after_terminate: bool = True,
-        include_components: Optional[Dict[str, Any]] = None,
-        exclude_components: Optional[Dict[str, Any]] = None,
-        resampling_strategy: Union[CrossValTypes, HoldoutValTypes] = HoldoutValTypes.holdout_validation,
+        include_components: Optional[Dict] = None,
+        exclude_components: Optional[Dict] = None,
+        resampling_strategy:Union[CrossValTypes,
+                                    HoldoutValTypes,
+                                    NoResamplingStrategyTypes] = HoldoutValTypes.holdout_validation,
         resampling_strategy_args: Optional[Dict[str, Any]] = None,
         backend: Optional[Backend] = None,
         search_space_updates: Optional[HyperparameterSearchSpaceUpdates] = None
