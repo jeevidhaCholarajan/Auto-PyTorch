@@ -28,7 +28,6 @@ from autoPyTorch.datasets.base_dataset import BaseDataset
 from autoPyTorch.datasets.resampling_strategy import (
     CrossValTypes,
     HoldoutValTypes,
-    NoResamplingStrategyTypes
 )
 from autoPyTorch.optimizer.smbo import AutoMLSMBO
 from autoPyTorch.pipeline.base_pipeline import BasePipeline
@@ -150,7 +149,6 @@ def test_tabular_classification(openml_id, resampling_strategy, backend, resampl
             run_key_model_run_dir,
             f"{estimator.seed}.{successful_num_run}.{run_key.budget}.cv_model"
         )
-        time.sleep(5)
         assert os.path.exists(model_file), print_debug_information(estimator)
 
         model = estimator._backend.load_cv_model_by_seed_and_id_and_budget(
@@ -499,6 +497,7 @@ def test_do_dummy_prediction(dask_client, fit_dictionary_tabular):
     del estimator
 
 
+@unittest.skip("Skipping tests as portfolio is not compatible with reg_cocktails")
 @unittest.mock.patch('autoPyTorch.evaluation.train_evaluator.eval_function',
                      new=dummy_eval_function)
 @pytest.mark.parametrize('openml_id', (40981, ))

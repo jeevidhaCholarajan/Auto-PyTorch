@@ -23,6 +23,7 @@ from autoPyTorch.datasets.resampling_strategy import (
     CrossValTypes,
     DEFAULT_RESAMPLING_PARAMETERS,
     HoldoutValTypes,
+    NoResamplingStrategyTypes
 )
 from autoPyTorch.ensemble.ensemble_builder import EnsembleBuilderManager
 from autoPyTorch.evaluation.tae import ExecuteTaFuncWithQueue, get_cost_of_crash
@@ -98,11 +99,13 @@ class AutoMLSMBO(object):
                  pipeline_config: Dict[str, Any],
                  start_num_run: int = 1,
                  seed: int = 1,
-                 resampling_strategy: Union[HoldoutValTypes, CrossValTypes] = HoldoutValTypes.holdout_validation,
+                 resampling_strategy: Union[HoldoutValTypes,
+                                            CrossValTypes,
+                                            NoResamplingStrategyTypes] = HoldoutValTypes.holdout_validation,
                  resampling_strategy_args: Optional[Dict[str, Any]] = None,
                  include: Optional[Dict[str, Any]] = None,
                  exclude: Optional[Dict[str, Any]] = None,
-                 disable_file_output: List = [],
+                 disable_file_output: Union[bool, List[str]] = False,
                  smac_scenario_args: Optional[Dict[str, Any]] = None,
                  get_smac_object_callback: Optional[Callable] = None,
                  all_supported_metrics: bool = True,
@@ -245,6 +248,10 @@ class AutoMLSMBO(object):
         if portfolio_selection is not None:
             self.initial_configurations = read_return_initial_configurations(config_space=config_space,
                                                                              portfolio_selection=portfolio_selection)
+            if len(self.initial_configurations) == 0:
+                self.initial_configurations = None
+                self.logger.warning("None of the portfolio configurations are compatible"
+                                    " with the current search space. Skipping initial configuration...")
 
     def reset_data_manager(self) -> None:
         if self.datamanager is not None:
