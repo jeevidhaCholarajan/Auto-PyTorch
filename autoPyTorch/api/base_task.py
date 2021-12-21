@@ -27,7 +27,7 @@ import numpy as np
 
 import pandas as pd
 
-from smac.runhistory.runhistory import DataOrigin, RunHistory
+from smac.runhistory.runhistory import DataOrigin, RunHistory, RunInfo, RunValue
 from smac.stats.stats import Stats
 from smac.tae import StatusType
 
@@ -291,7 +291,10 @@ class BaseTask(ABC):
         y_train: Union[List, pd.DataFrame, np.ndarray],
         X_test: Optional[Union[List, pd.DataFrame, np.ndarray]] = None,
         y_test: Optional[Union[List, pd.DataFrame, np.ndarray]] = None,
-        resampling_strategy: Optional[Union[CrossValTypes, HoldoutValTypes]] = None,
+        resampling_strategy: Optional[Union[
+            CrossValTypes,
+            HoldoutValTypes,
+            NoResamplingStrategyTypes]] = None,
         resampling_strategy_args: Optional[Dict[str, Any]] = None,
         dataset_name: Optional[str] = None,
     ) -> Tuple[BaseDataset, BaseInputValidator]:
@@ -335,7 +338,10 @@ class BaseTask(ABC):
         y_train: Union[List, pd.DataFrame, np.ndarray],
         X_test: Optional[Union[List, pd.DataFrame, np.ndarray]] = None,
         y_test: Optional[Union[List, pd.DataFrame, np.ndarray]] = None,
-        resampling_strategy: Optional[Union[CrossValTypes, HoldoutValTypes]] = None,
+        resampling_strategy: Optional[Union[
+            CrossValTypes,
+            HoldoutValTypes,
+            NoResamplingStrategyTypes]] = None,
         resampling_strategy_args: Optional[Dict[str, Any]] = None,
         dataset_name: Optional[str] = None,
     ) -> BaseDataset:
@@ -593,18 +599,6 @@ class BaseTask(ABC):
             raise ValueError("Resampling strategy is needed to determine what models to load")
         self.ensemble_ = self._backend.load_ensemble(self.seed)
 
-        # TODO: remove this code after `fit_pipeline` is rebased.
-        if hasattr(self, '_disable_file_output'):
-            if isinstance(self._disable_file_output, List):
-                disabled_file_outputs = self._disable_file_output
-                disable_file_output = False
-            elif isinstance(self._disable_file_output, bool):
-                disable_file_output = self._disable_file_output
-                disabled_file_outputs = []
-        else:
-            disable_file_output = False
-            disabled_file_outputs = []
-
         # If no ensemble is loaded, try to get the best performing model
         if not self.ensemble_:
             self.ensemble_ = self._load_best_individual_model()
@@ -619,7 +613,7 @@ class BaseTask(ABC):
                 if len(self.cv_models_) == 0:
                     raise ValueError('No models fitted!')
 
-        elif disable_file_output or 'pipeline' not in disabled_file_outputs:
+        elif 'pipeline' not in self._disable_file_output:
             model_names = self._backend.list_all_models(self.seed)
 
             if len(model_names) == 0:
@@ -1395,7 +1389,10 @@ class BaseTask(ABC):
         X_test: Optional[Union[List, pd.DataFrame, np.ndarray]] = None,
         y_test: Optional[Union[List, pd.DataFrame, np.ndarray]] = None,
         dataset_name: Optional[str] = None,
-        resampling_strategy: Optional[Union[HoldoutValTypes, CrossValTypes]] = None,
+        resampling_strategy: Optional[Union[
+            CrossValTypes,
+            HoldoutValTypes,
+            NoResamplingStrategyTypes]] = None,
         resampling_strategy_args: Optional[Dict[str, Any]] = None,
         run_time_limit_secs: int = 60,
         memory_limit: Optional[int] = None,
@@ -1511,7 +1508,6 @@ class BaseTask(ABC):
             (BaseDataset):
                 Dataset created from the given tensors
         """
-        self.dataset_name = dataset.dataset_name
 
         if dataset is None:
             if (

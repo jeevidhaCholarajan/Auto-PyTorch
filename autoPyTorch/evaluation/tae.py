@@ -30,9 +30,6 @@ from autoPyTorch.datasets.resampling_strategy import (
     HoldoutValTypes,
     NoResamplingStrategyTypes
 )
-import autoPyTorch.evaluation.fit_evaluator
-import autoPyTorch.evaluation.train_evaluator
-from autoPyTorch.automl_common.common.utils.backend import Backend
 from autoPyTorch.evaluation.utils import (
     DisableFileOutputParameters,
     empty_queue,

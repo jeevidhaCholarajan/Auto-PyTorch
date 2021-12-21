@@ -156,7 +156,10 @@ class TabularRegressionTask(BaseTask):
         y_train: Union[List, pd.DataFrame, np.ndarray],
         X_test: Optional[Union[List, pd.DataFrame, np.ndarray]] = None,
         y_test: Optional[Union[List, pd.DataFrame, np.ndarray]] = None,
-        resampling_strategy: Optional[Union[CrossValTypes, HoldoutValTypes]] = None,
+        resampling_strategy: Optional[Union[
+            CrossValTypes,
+            HoldoutValTypes,
+            NoResamplingStrategyTypes]] = None,
         resampling_strategy_args: Optional[Dict[str, Any]] = None,
         dataset_name: Optional[str] = None,
     ) -> Tuple[TabularDataset, TabularInputValidator]:
@@ -385,9 +388,6 @@ class TabularRegressionTask(BaseTask):
                 'Expected `self.resampling_strategy` to be either '
                 '(CrossValTypes, HoldoutValTypes), but got {}'.format(self.resampling_strategy)
             )
-
-        if self.dataset is None:
-            raise ValueError("`dataset` in {} must be initialized, but got None".format(self.__class__.__name__))
 
         return self._search(
             dataset=self.dataset,
